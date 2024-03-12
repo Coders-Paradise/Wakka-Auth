@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import datetime
 from pathlib import Path
 from .env import ENV
 
@@ -23,12 +24,12 @@ ENV.init_env()
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-4+4iz6^@1-6!8#9tpmajs=k++7wnyr^z4u8^ecl5$i@upk+m9x"
+SECRET_KEY = ENV.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = ENV.DEBUG
+DEBUG = ENV.DEBUG == "True"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -40,9 +41,17 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
+    "wakka",
 ]
 
+if DEBUG:
+    INSTALLED_APPS += [
+        "drf_spectacular",
+    ]
+
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -50,6 +59,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "wakka.middleware.ServerAuthMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -78,8 +88,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": ENV.DB_NAME,
+        "USER": ENV.DB_USER,
+        "PASSWORD": ENV.DB_PASS,
+        "HOST": ENV.DB_HOST,
+        "PORT": ENV.DB_PORT,
     }
 }
 
@@ -124,3 +138,31 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Custom Auth Model
+AUTH_USER_MODEL = "wakka.User"
+
+# ------------------- DRF-SPECTACULAR SETTINGS -------------------
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
+    ],
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Wakka Auth",
+    "DESCRIPTION": "Fully Packed Authentication API Service",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
+
+# ------------------- JWT SETTINGS -------------------
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=10),
+    "REFRESH_TOKEN_LIFETIME": datetime.timedelta(days=5),
+}
