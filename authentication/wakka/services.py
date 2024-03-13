@@ -1,6 +1,7 @@
 from django.http import HttpRequest
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
+
 from .constants import ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME
 
 from .exceptions import InvalidCredentialsException, InvalidRefreshTokenException
@@ -26,6 +27,10 @@ class AuthService:
     def get_token_pair(cls, request: HttpRequest):
         user = cls.get_user(request)
         refresh = RefreshToken.for_user(user)
+        refresh["email"] = user.email
+        refresh["name"] = user.name
+        refresh["app"] = user.app.app_name
+
         return {
             REFRESH_TOKEN_NAME: str(refresh),
             ACCESS_TOKEN_NAME: str(refresh.access_token),
@@ -40,3 +45,8 @@ class AuthService:
             access_token = refresh_token.access_token
             return {ACCESS_TOKEN_NAME: str(access_token)}
         raise InvalidRefreshTokenException
+
+    @classmethod
+    def create_user(cls, email=None, password=None, **extra_fields):
+        user = User.objects.create_user(email, password, **extra_fields)
+        return user

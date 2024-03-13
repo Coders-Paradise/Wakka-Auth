@@ -1,18 +1,39 @@
+import re
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import Token
-from django.contrib.auth.models import User
+from .models import User
 from rest_framework import serializers
 
 
-class WakkaTokenObtainSerializer(TokenObtainSerializer):
-    @classmethod
-    def get_token(cls, user: User) -> Token:
-        token = super().get_token(user)
+class TokenPairRequestSeralizer(serializers.Serializer):
+    email = serializers.CharField()
+    password = serializers.CharField()
+
+    def create(self, validated_data):
+        raise NotImplementedError()
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError()
+
+    def validate(self, attrs):
+        if re.match(r"[^@]+@[^@]+\.[^@]+", attrs["email"]) == None:
+            raise serializers.ValidationError("Invalid email format")
+        return super().validate(attrs)
 
 
-class TokenObtainPairResponseSerializer(serializers.Serializer):
-    access = serializers.CharField()
-    refresh = serializers.CharField()
+class TokenPairResponseSerializer(serializers.Serializer):
+    access_token = serializers.CharField()
+    refresh_token = serializers.CharField()
+
+    def create(self, validated_data):
+        raise NotImplementedError()
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError()
+
+
+class TokenRefreshRequestSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField()
 
     def create(self, validated_data):
         raise NotImplementedError()
@@ -22,7 +43,7 @@ class TokenObtainPairResponseSerializer(serializers.Serializer):
 
 
 class TokenRefreshResponseSerializer(serializers.Serializer):
-    access = serializers.CharField()
+    access_token = serializers.CharField()
 
     def create(self, validated_data):
         raise NotImplementedError()

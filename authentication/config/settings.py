@@ -53,6 +53,7 @@ if DEBUG:
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
+    "wakka.middleware.AppNameMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -61,7 +62,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "wakka.middleware.ServerAuthMiddleware",
-    "wakka.middleware.AppNameMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -167,6 +167,7 @@ SPECTACULAR_SETTINGS = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=10),
     "REFRESH_TOKEN_LIFETIME": datetime.timedelta(days=5),
+    # Crypto settings
     "ALGORITHM": "RS512",
     "SIGNING_KEY": ENV.JWT_PRIVATE_KEY.replace("\\r", "")
     .replace("\/", "/")
