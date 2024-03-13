@@ -5,7 +5,7 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
-from env import ENV
+from .env import ENV
 
 spectacular_urls = [
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

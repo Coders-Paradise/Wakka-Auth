@@ -5,13 +5,16 @@ _ENV_PREFIX = "WAKKA"
 
 class BaseEnv:
     DEBUG = "True"
-    SECRET_KEY = "secret_key"
     DB_NAME = "database"
     DB_USER = "user"
     DB_PASS = "pass"
     DB_HOST = "localhost"
     DB_PORT = "3306"
+
+    SECRET_KEY = "secret_key"
     SERVER_API_KEY = "server_api_key"
+    JWT_PRIVATE_KEY = "jwt_private_key"
+    JWT_PUBLIC_KEY = "jwt_public_key"
 
 
 class ENV(BaseEnv):

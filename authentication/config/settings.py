@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
+    "rest_framework_simplejwt",
     "wakka",
 ]
 
@@ -60,6 +61,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "wakka.middleware.ServerAuthMiddleware",
+    "wakka.middleware.AppNameMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -165,4 +167,11 @@ SPECTACULAR_SETTINGS = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=10),
     "REFRESH_TOKEN_LIFETIME": datetime.timedelta(days=5),
+    "ALGORITHM": "RS512",
+    "SIGNING_KEY": ENV.JWT_PRIVATE_KEY.replace("\\r", "")
+    .replace("\/", "/")
+    .replace("\\n", "\n"),
+    "VERIFYING_KEY": ENV.JWT_PUBLIC_KEY.replace("\\r", "")
+    .replace("\/", "/")
+    .replace("\\n", "\n"),
 }

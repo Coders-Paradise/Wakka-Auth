@@ -20,6 +20,7 @@ class Application(models.Model):
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     email = models.EmailField(null=False, blank=False)
+    username = models.CharField(max_length=40, unique=True)
     name = models.CharField(max_length=40, blank=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
@@ -27,8 +28,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     app = models.ForeignKey(Application, on_delete=models.CASCADE)
 
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = ["email"]
 
     objects = UserManager()
 
