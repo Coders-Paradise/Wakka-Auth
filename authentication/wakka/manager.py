@@ -1,4 +1,23 @@
 from django.contrib.auth.models import BaseUserManager
+from django.db import models
+from django.db.models.query import QuerySet
+from django.utils import timezone
+
+
+class SoftDeleteQuerySet(QuerySet):
+    def delete(self) -> tuple[int, dict[str, int]]:
+        deleted_at = timezone.now()
+        return super().update(deleted_at=deleted_at, is_active=False), {"deleted": 1}
+
+
+class AppManager(models.Manager):
+    def get_queryset(self) -> QuerySet:
+        return SoftDeleteQuerySet(self.model, using=self._db).filter(
+            deleted_at__isnull=True
+        )
+
+    def include_deleted(self) -> QuerySet:
+        return super().get_queryset()
 
 
 class UserManager(BaseUserManager):
@@ -31,3 +50,11 @@ class UserManager(BaseUserManager):
 
     def save(self, *args, **kwargs):
         return super().save(*args, **kwargs)
+
+    def get_queryset(self) -> QuerySet:
+        return SoftDeleteQuerySet(self.model, using=self._db).filter(
+            deleted_at__isnull=True
+        )
+
+    def include_deleted(self) -> QuerySet:
+        return super().get_queryset()

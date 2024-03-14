@@ -1,16 +1,18 @@
+from typing import Any
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-
-# from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import Application, User
 from django.db.models.query import QuerySet
+from django.http import HttpRequest
+
+from .models import Application, User
 
 
 class CustomUserAdmin(UserAdmin):
-    # add_form = CustomUserCreationForm
-    # form = CustomUserChangeForm
     model = User
     list_display = (
+        "username",
+        "name",
         "email",
         "is_staff",
         "is_active",
@@ -21,7 +23,7 @@ class CustomUserAdmin(UserAdmin):
         "is_active",
     )
     fieldsets = (
-        (None, {"fields": ("username", "email", "password", "app")}),
+        (None, {"fields": ("username", "name","email", "password", "app")}),
         (
             "Permissions",
             {"fields": ("is_staff", "is_active", "groups", "user_permissions")},
@@ -34,6 +36,8 @@ class CustomUserAdmin(UserAdmin):
                 "classes": ("wide",),
                 "fields": (
                     "email",
+                    "username",
+                    "name",
                     "password1",
                     "password2",
                     "app",
@@ -48,15 +52,18 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ("email",)
     ordering = ("email",)
 
+    def delete_queryset(self, request: HttpRequest, queryset: QuerySet[User]) -> None:
+        for obj in queryset:
+            obj.delete()
+        return super().delete_queryset(request, queryset)
+
 
 class ApplicationAdmin(admin.ModelAdmin):
     list_display = ("app_name", "title")
     search_fields = ("app_name", "title")
     ordering = ("app_name",)
-    readonly_fields = (
-        "server_api_key",
-        "server_api_key_hash",
-    )
+    fields = ("title", "app_name", "server_api_key")
+    readonly_fields = ("server_api_key",)
     actions = ["nullify_server_api_key", "regenerate_api_key"]
 
     def nullify_server_api_key(self, request, queryset: QuerySet[Application]):

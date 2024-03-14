@@ -1,5 +1,5 @@
-from rest_framework.exceptions import APIException
 from rest_framework import status
+from rest_framework.exceptions import APIException
 
 
 class BaseException(APIException):
@@ -14,17 +14,18 @@ class BaseException(APIException):
 
 class InvalidAppNameException(BaseException):
     def __init__(self):
-        super().__init__("Invalid app name", status.HTTP_400_BAD_REQUEST)
+        super().__init__("Invalid app name in header", status.HTTP_400_BAD_REQUEST)
 
 
 class InvalidServerApiKeyException(BaseException):
     def __init__(self):
-        super().__init__("Invalid server api key", status.HTTP_403_FORBIDDEN)
+        super().__init__("Invalid server api key in header", status.HTTP_403_FORBIDDEN)
 
 
 class InvalidCredentialsException(BaseException):
     def __init__(self):
-        super().__init__("Invalid credentials", status.HTTP_403_FORBIDDEN)
+        super().__init__("Invalid credentials", status.HTTP_401_UNAUTHORIZED)
+
 
 class InvalidRefreshTokenException(BaseException):
     def __init__(self):

@@ -6,13 +6,15 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.exceptions import ValidationError
 from django.core.management.utils import get_random_secret_key
 from django.db import models
+from django.utils import timezone
 
-from .manager import UserManager
+from .manager import AppManager, UserManager
 
 
 class Application(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     title = models.CharField(max_length=40)
+    deleted_at = models.DateTimeField(null=True, blank=True)
     app_name = models.CharField(
         max_length=40,
         unique=True,
@@ -25,6 +27,7 @@ class Application(models.Model):
         help_text="Copy this key to the target application. Set this field to null once you copied the key using Actions.",
     )
     server_api_key_hash = models.CharField(max_length=255, blank=True)
+    objects = AppManager()
 
     def regenerate_server_api_key(self):
         self.server_api_key = get_random_secret_key()
@@ -43,6 +46,9 @@ class Application(models.Model):
         if " " in self.app_name:
             raise ValidationError("App name must not contain spaces")
         return super().clean()
+
+    def delete(self) -> tuple[int, dict[str, int]]:
+        self.deleted_at = timezone.now()
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -64,6 +70,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
     app = models.ForeignKey(Application, on_delete=models.CASCADE)
 
     USERNAME_FIELD = "username"
@@ -79,3 +86,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.name
+
+    def delete(self) -> tuple[int, dict[str, int]]:
+        self.is_active = False
+        print("Model")
+        self.deleted_at = timezone.now()
+
+    def save(self, *args, **kwargs):
+        print("Model Save")
+        if not self.username:
+            username = f"{self.app.app_name}_{'_'.join(self.name.split()).lower()}"
+            self.username = username
+        return super().save(*args, **kwargs)

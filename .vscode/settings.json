@@ -1,0 +1,7 @@
+{
+  "folder-path-color.folders": [
+    { "path": "authentication/config", "symbol": "$", "tooltip": "Config" },
+    { "path": "authentication/wakka", "symbol": "", "tooltip": "Wakka" }
+  ],
+  "python.analysis.extraPaths": ["./authentication", "./venv"]
+}

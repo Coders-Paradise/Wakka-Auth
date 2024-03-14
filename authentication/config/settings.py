@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import datetime
 from pathlib import Path
+
 from .env import ENV
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -53,7 +54,7 @@ if DEBUG:
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
-    "wakka.middleware.AppNameMiddleware",
+    # "wakka.middleware.AppNameMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -61,7 +62,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "wakka.middleware.ServerAuthMiddleware",
+    # "wakka.middleware.ServerAuthMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -149,7 +150,8 @@ AUTH_USER_MODEL = "wakka.User"
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        # "rest_framework_simplejwt.authentication.JWTAuthentication",
+        # "wakka.authentication.WakkaAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
@@ -167,6 +169,8 @@ SPECTACULAR_SETTINGS = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=10),
     "REFRESH_TOKEN_LIFETIME": datetime.timedelta(days=5),
+    "UPDATE_LAST_LOGIN": True,
+    "ISSUER": "Wakka Auth",
     # Crypto settings
     "ALGORITHM": "RS512",
     "SIGNING_KEY": ENV.JWT_PRIVATE_KEY.replace("\\r", "")

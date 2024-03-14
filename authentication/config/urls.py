@@ -1,29 +1,32 @@
 from django.contrib import admin
-from django.urls import path, include
-from drf_spectacular.views import (
-    SpectacularAPIView,
-    SpectacularRedocView,
-    SpectacularSwaggerView,
-)
+from django.urls import include, path
+from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
+                                   SpectacularSwaggerView)
+
+from .constants import ADMIN_URL, API_URL, DOCS_URL
 from .env import ENV
 
 spectacular_urls = [
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(DOCS_URL + "schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
-        "api/docs/",
+        DOCS_URL + "swagger/",
         SpectacularSwaggerView.as_view(),
         name="swagger",
     ),
     path(
-        "api/redoc/",
+        DOCS_URL + "redoc/",
         SpectacularRedocView.as_view(),
         name="redoc",
     ),
 ]
 
+admin_urls = [
+    path(ADMIN_URL, admin.site.urls, name="admin"),
+]
+
 urlpatterns = [
-    path("admin/", admin.site.urls, name="admin"),
-    path("api/v1/", include("wakka.urls"), name="api"),
+    *admin_urls,
+    path(API_URL, include("wakka.urls"), name="api"),
 ]
 
 
