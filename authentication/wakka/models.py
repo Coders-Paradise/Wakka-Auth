@@ -19,7 +19,7 @@ class Application(models.Model):
         max_length=40,
         unique=True,
         help_text="Unique name for the application. Contains lowercase letters, numbers, and underscores. No spaces allowed.",
-    )
+    )  # app name should always contain lowercase letters, numbers, and underscores
     server_api_key = models.CharField(
         max_length=50,
         blank=True,
@@ -29,7 +29,7 @@ class Application(models.Model):
     server_api_key_hash = models.CharField(max_length=255, blank=True)
     objects = AppManager()
 
-    def regenerate_server_api_key(self):
+    def generate_server_api_key(self):
         self.server_api_key = get_random_secret_key()
         self.server_api_key_hash = make_password(self.server_api_key)
         self.save()
@@ -53,8 +53,7 @@ class Application(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         if not self.server_api_key_hash:
-            self.server_api_key = get_random_secret_key()
-            self.server_api_key_hash = make_password(self.server_api_key)
+            self.generate_server_api_key()
         return super().save(*args, **kwargs)
 
     def __str__(self):
@@ -89,12 +88,11 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def delete(self) -> tuple[int, dict[str, int]]:
         self.is_active = False
-        print("Model")
         self.deleted_at = timezone.now()
 
     def save(self, *args, **kwargs):
-        print("Model Save")
         if not self.username:
+            # If the username is empty, set a new username like instagram_john_doe
             username = f"{self.app.app_name}_{'_'.join(self.name.split()).lower()}"
             self.username = username
         return super().save(*args, **kwargs)

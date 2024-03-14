@@ -5,12 +5,16 @@ from django.utils import timezone
 
 
 class SoftDeleteQuerySet(QuerySet):
+    """Custom QuerySet to enable soft delete objects."""
+
     def delete(self) -> tuple[int, dict[str, int]]:
         deleted_at = timezone.now()
         return super().update(deleted_at=deleted_at, is_active=False), {"deleted": 1}
 
 
 class AppManager(models.Manager):
+    """Model Manager implementing SoftDeleteQuerySet for Application model."""
+
     def get_queryset(self) -> QuerySet:
         return SoftDeleteQuerySet(self.model, using=self._db).filter(
             deleted_at__isnull=True
@@ -21,6 +25,8 @@ class AppManager(models.Manager):
 
 
 class UserManager(BaseUserManager):
+    "Custom User Model Manager implementing SoftDeleteQuerySet."
+
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError("The Email field must be set")
@@ -36,6 +42,7 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
 
+        # Superuser always belong to the administration app
         app = Application.objects.get_or_create(
             app_name="administration", title="Administration"
         )[0]

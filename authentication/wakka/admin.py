@@ -23,7 +23,7 @@ class CustomUserAdmin(UserAdmin):
         "is_active",
     )
     fieldsets = (
-        (None, {"fields": ("username", "name","email", "password", "app")}),
+        (None, {"fields": ("username", "name", "email", "password", "app")}),
         (
             "Permissions",
             {"fields": ("is_staff", "is_active", "groups", "user_permissions")},
@@ -79,7 +79,7 @@ class ApplicationAdmin(admin.ModelAdmin):
 
     def regenerate_api_key(self, request, queryset: QuerySet[Application]):
         for obj in queryset:
-            obj.regenerate_server_api_key()
+            obj.generate_server_api_key()
         self.message_user(
             request, "Server API key regenerated for selected applications."
         )

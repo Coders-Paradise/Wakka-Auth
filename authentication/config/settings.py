@@ -18,7 +18,7 @@ from .env import ENV
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# setting ENV
+# initializing ENV
 ENV.init_env()
 
 # Quick-start development settings - unsuitable for production
@@ -54,7 +54,6 @@ if DEBUG:
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
-    # "wakka.middleware.AppNameMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -62,7 +61,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    # "wakka.middleware.ServerAuthMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -149,10 +147,7 @@ AUTH_USER_MODEL = "wakka.User"
 # ------------------- DRF-SPECTACULAR SETTINGS -------------------
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        # "rest_framework_simplejwt.authentication.JWTAuthentication",
-        # "wakka.authentication.WakkaAuthentication",
-    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
@@ -160,7 +155,7 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Wakka Auth",
-    "DESCRIPTION": "Fully Packed Authentication API Service",
+    "DESCRIPTION": "JWT Authentication API Service",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }

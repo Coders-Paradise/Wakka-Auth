@@ -1,13 +1,8 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
-from rest_framework_simplejwt.views import (TokenObtainPairView,
-                                            TokenRefreshView)
-from wakka.authentication import (WakkaAppNameAuthentication,
-                                  WakkaServerAuthentication)
+from wakka.authentication import WakkaAppNameAuthentication, WakkaServerAuthentication
 
 from . import serializers
 from .services import AuthService
@@ -31,12 +26,13 @@ class TokenObtainPairView(APIView):
     )
     def post(self, request, *args, **kwargs):
         token_pair = AuthService.get_token_pair(request=request)
-        return Response(token_pair)
+        serializer = serializers.TokenPairResponseSerializer(token_pair)
+        return Response(serializer.data)
 
 
 @extend_schema(tags=["Client"])
 class TokenRefreshView(APIView):
-    authentication_classes = []
+    authentication_classes = [WakkaAppNameAuthentication]
 
     @extend_schema(
         request=serializers.TokenRefreshRequestSerializer,
@@ -44,4 +40,5 @@ class TokenRefreshView(APIView):
     )
     def post(self, request, *args, **kwargs):
         access_token = AuthService.get_access_token(request=request)
-        return Response(access_token)
+        serializer = serializers.TokenRefreshResponseSerializer(access_token)
+        return Response(serializer.data)

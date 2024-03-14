@@ -3,7 +3,7 @@ from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 
 from .constants import ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME
-
+from .serializers import TokenPairRequestSeralizer, TokenRefreshRequestSerializer
 from .exceptions import InvalidCredentialsException, InvalidRefreshTokenException
 from .models import User
 
@@ -13,15 +13,17 @@ class AuthService:
     @classmethod
     def get_user(cls, request: HttpRequest):
         data = request.data
-        app_name = request.app_name
-        email = data.get("username")
-        password = data.get("password")
-        user = User.objects.filter(email=email, app__app_name=app_name)
-        if user.exists():
-            user = user.first()
-            if user.check_password(password):
-                return user
-        raise InvalidCredentialsException
+        serializer = TokenPairRequestSeralizer(data=data)
+        if serializer.is_valid(raise_exception=True):
+            app_name = request.app_name
+            email = serializer.validated_data.get("email")
+            password = serializer.validated_data.get("password")
+            user = User.objects.filter(email=email, app__app_name=app_name)
+            if user.exists():
+                user = user.first()
+                if user.check_password(password):
+                    return user
+            raise InvalidCredentialsException
 
     @classmethod
     def get_token_pair(cls, request: HttpRequest):
@@ -38,7 +40,9 @@ class AuthService:
 
     @classmethod
     def get_access_token(cls, request: HttpRequest):
-        refresh_token = request.data.get(REFRESH_TOKEN_NAME)
+        serializer = TokenRefreshRequestSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            refresh_token = serializer.validated_data.get(REFRESH_TOKEN_NAME)
         if refresh_token:
             refresh_token = RefreshToken(refresh_token)
             refresh_token.verify()
