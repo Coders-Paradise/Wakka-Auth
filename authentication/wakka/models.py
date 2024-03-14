@@ -63,7 +63,7 @@ class Application(models.Model):
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     email = models.EmailField(null=False, blank=False)
-    username = models.CharField(max_length=40, unique=True)
+    username = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=40, blank=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
@@ -89,10 +89,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     def delete(self) -> tuple[int, dict[str, int]]:
         self.is_active = False
         self.deleted_at = timezone.now()
+        self.save()
+
+    def hard_delete(self) -> tuple[int, dict[str, int]]:
+        return super().delete()
 
     def save(self, *args, **kwargs):
+
         if not self.username:
-            # If the username is empty, set a new username like instagram_john_doe
-            username = f"{self.app.app_name}_{'_'.join(self.name.split()).lower()}"
+            # If the username is empty, set a new username like instagram$$johndoe@test.com
+            username = f"{self.app.app_name}$${self.email}".lower()
             self.username = username
         return super().save(*args, **kwargs)

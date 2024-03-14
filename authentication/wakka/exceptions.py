@@ -30,3 +30,8 @@ class InvalidCredentialsException(BaseException):
 class InvalidRefreshTokenException(BaseException):
     def __init__(self):
         super().__init__("Invalid refresh token", status.HTTP_400_BAD_REQUEST)
+
+
+class UserAlreadyExistsException(BaseException):
+    def __init__(self):
+        super().__init__("User already exists", status.HTTP_409_CONFLICT)

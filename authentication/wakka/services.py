@@ -1,11 +1,13 @@
 from django.http import HttpRequest
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
-
 from .constants import ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME
-from .serializers import TokenPairRequestSeralizer, TokenRefreshRequestSerializer
-from .exceptions import InvalidCredentialsException, InvalidRefreshTokenException
-from .models import User
+from .exceptions import (InvalidAppNameException, InvalidCredentialsException,
+                         InvalidRefreshTokenException,
+                         UserAlreadyExistsException)
+from .models import Application, User
+from .serializers import (TokenPairRequestSeralizer,
+                          TokenRefreshRequestSerializer)
 
 
 class AuthService:
@@ -51,6 +53,32 @@ class AuthService:
         raise InvalidRefreshTokenException
 
     @classmethod
-    def create_user(cls, email=None, password=None, **extra_fields):
-        user = User.objects.create_user(email, password, **extra_fields)
+    def create_user(
+        cls,
+        email: str = None,
+        password: str = None,
+        name: str = None,
+        app: Application = None,
+        **extra_fields,
+    ):
+        user = User.objects.include_deleted().filter(email=email, app=app)
+        """
+        Checks if user already exists.
+        Case 1: User exists but soft deleted -> Hard delete the user and create a new user
+        Case 2: User exists but not soft deleted -> Raise UserAlreadyExistsException
+        """
+        if user.exists():
+            user = user.first()
+            if user.deleted_at: # Case 1
+                user.hard_delete()
+            else:
+                raise UserAlreadyExistsException
+        
+        user = User.objects.create_user(
+            email=email,
+            password=password,
+            app=app,
+            name=name,
+            **extra_fields,
+        )
         return user
