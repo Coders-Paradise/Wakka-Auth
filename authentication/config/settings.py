@@ -156,7 +156,7 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "Wakka Auth",
     "DESCRIPTION": "JWT Authentication API Service",
-    "VERSION": "1.0.0",
+    "VERSION": "7.10.14",
     "SERVE_INCLUDE_SCHEMA": False,
 }
 

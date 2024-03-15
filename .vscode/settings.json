@@ -1,4 +1,12 @@
 {
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "always"
+    }
+  },
+  "isort.args": ["--profile", "black"],
   "folder-path-color.folders": [
     { "path": "authentication/config", "symbol": "$", "tooltip": "Config" },
     { "path": "authentication/wakka", "symbol": "", "tooltip": "Wakka" }

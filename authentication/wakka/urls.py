@@ -14,6 +14,7 @@ token_urlpatterns = [
 
 user_urlpatterns = [
     path("user/", views.UserView.as_view(), name="user"),
+    path("user/<str:user_id>/", views.UserDetailView.as_view(), name="user-detail"),
 ]
 
 urlpatterns = [*token_urlpatterns, *test_urlpatterns, *user_urlpatterns]

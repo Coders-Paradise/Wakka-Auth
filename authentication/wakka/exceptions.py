@@ -35,3 +35,8 @@ class InvalidRefreshTokenException(BaseException):
 class UserAlreadyExistsException(BaseException):
     def __init__(self):
         super().__init__("User already exists", status.HTTP_409_CONFLICT)
+
+
+class UserDoesNotExistException(BaseException):
+    def __init__(self):
+        super().__init__("User does not exist", status.HTTP_404_NOT_FOUND)

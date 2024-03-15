@@ -66,7 +66,9 @@ class ApplicationAdmin(admin.ModelAdmin):
     readonly_fields = ("server_api_key",)
     actions = ["nullify_server_api_key", "regenerate_api_key"]
 
-    def nullify_server_api_key(self, request, queryset: QuerySet[Application]):
+    def nullify_server_api_key(
+        self, request: HttpRequest, queryset: QuerySet[Application]
+    ):
         for obj in queryset:
             obj.nullify_server_api_key()
         self.message_user(
@@ -77,7 +79,7 @@ class ApplicationAdmin(admin.ModelAdmin):
         "Nullify server API key for selected applications"
     )
 
-    def regenerate_api_key(self, request, queryset: QuerySet[Application]):
+    def regenerate_api_key(self, request: HttpRequest, queryset: QuerySet[Application]):
         for obj in queryset:
             obj.generate_server_api_key()
         self.message_user(

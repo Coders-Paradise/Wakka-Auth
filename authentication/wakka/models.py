@@ -48,10 +48,12 @@ class Application(models.Model):
         return super().clean()
 
     def delete(self) -> tuple[int, dict[str, int]]:
+        self.app_name = f"{self.app_name}$$deleted"
         self.deleted_at = timezone.now()
 
     def save(self, *args, **kwargs):
         self.full_clean()
+        # If the hash is empty, generate a new server api key, hash pair
         if not self.server_api_key_hash:
             self.generate_server_api_key()
         return super().save(*args, **kwargs)
@@ -71,7 +73,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
     app = models.ForeignKey(Application, on_delete=models.CASCADE)
-
+    verified = models.BooleanField(default=False)
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email"]
 
@@ -88,6 +90,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def delete(self) -> tuple[int, dict[str, int]]:
         self.is_active = False
+        self.username = f"{self.username}$$deleted"
         self.deleted_at = timezone.now()
         self.save()
 
