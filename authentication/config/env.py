@@ -16,6 +16,11 @@ class BaseEnv:
     JWT_PRIVATE_KEY = "jwt_private_key"
     JWT_PUBLIC_KEY = "jwt_public_key"
 
+    EMAIL_HOST = "smtp.gmail.com"
+    EMAIL_FROM = "example@gmail.com"
+    EMAIL_HOST_USER = "example@gmail.com"
+    EMAIL_HOST_PASSWORD = "pass"
+
 
 class ENV(BaseEnv):
 

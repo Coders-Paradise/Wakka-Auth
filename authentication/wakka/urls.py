@@ -1,4 +1,6 @@
-from django.urls import path
+from django.urls import include, path
+
+from config.constants import API_URL, VERIFY_URL
 
 from . import views
 
@@ -17,4 +19,31 @@ user_urlpatterns = [
     path("user/<str:user_id>/", views.UserDetailView.as_view(), name="user-detail"),
 ]
 
-urlpatterns = [*token_urlpatterns, *test_urlpatterns, *user_urlpatterns]
+verify_urlpatterns = [
+    path(
+        "verify-email/",
+        views.EmailVerificationResponseView.as_view(),
+        name="verify-email",
+    ),
+]
+
+mail_urlpatterns = [
+    path(
+        "resend-verification-email/",
+        views.EmailVerificationResendView.as_view(),
+        name="resend-verification-email",
+    ),
+]
+
+api_urlpatterns = [
+    *token_urlpatterns,
+    *test_urlpatterns,
+    *user_urlpatterns,
+    *mail_urlpatterns,
+]
+
+
+urlpatterns = [
+    path(API_URL, include((api_urlpatterns, "wakka"), namespace="api")),
+    path(VERIFY_URL, include((verify_urlpatterns, "wakka"), namespace="one-time")),
+]

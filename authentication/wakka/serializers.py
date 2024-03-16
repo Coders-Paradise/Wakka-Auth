@@ -121,4 +121,8 @@ class UserResponseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "email", "name", "app", "date_joined", "is_active"]
+        fields = ["id", "email", "name", "app", "date_joined", "is_active", "verified"]
+
+
+class EmailVerificationRequestSerializer(serializers.Serializer):
+    user_id = serializers.CharField()

@@ -1,7 +1,10 @@
 from django.contrib import admin
 from django.urls import include, path
-from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
-                                   SpectacularSwaggerView)
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 
 from .constants import ADMIN_URL, API_URL, DOCS_URL
 from .env import ENV
@@ -26,7 +29,7 @@ admin_urls = [
 
 urlpatterns = [
     *admin_urls,
-    path(API_URL, include("wakka.urls"), name="api"),
+    path("", include("wakka.urls"), name="api"),
 ]
 
 

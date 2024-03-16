@@ -1,17 +1,25 @@
 from django.contrib.auth.models import update_last_login
+from django.core.mail import EmailMessage
 from django.http import HttpRequest
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 from .constants import ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME
 from .exceptions import (
     InvalidAppNameException,
     InvalidCredentialsException,
+    InvalidEmailVerificationLinkException,
     InvalidRefreshTokenException,
+    OneTimeTokenInvalidException,
     UserAlreadyExistsException,
     UserDoesNotExistException,
+    UserNotVerifiedException,
+    VerificationEmailSendingFailedException,
 )
 from .models import Application, User
-from .serializers import TokenPairRequestSeralizer, TokenRefreshRequestSerializer
+from .utils import OneTimeJWTToken
 
 
 class AuthService:
@@ -24,16 +32,33 @@ class AuthService:
         raise UserDoesNotExistException
 
     @classmethod
+    def get_user_by_email(cls, email: str = None, app: Application = None) -> User:
+        """Get user by email and app. If user does not exist, return None."""
+        user = User.objects.filter(email=email, app=app).first()
+        return user
+
+    @classmethod
     def get_user_by_email_password(
         cls,
         email: str = None,
         password: str = None,
         app: Application = None,
     ) -> User:
-        user = User.objects.filter(email=email, app=app).first()
+        """Get user by email and password. If user does not exist, raise InvalidCredentialsException."""
+        user = cls.get_user_by_email(email=email, app=app)
         if user and user.check_password(password):
             return user
         raise InvalidCredentialsException
+
+    @classmethod
+    def check_user_verification_status(
+        cls, user: User = None, raise_exception: bool = False
+    ) -> bool:
+        if user and user.verified:
+            return True
+        if raise_exception:
+            raise UserNotVerifiedException
+        return False
 
     @classmethod
     def get_token_pair(
@@ -47,6 +72,7 @@ class AuthService:
             password=password,
             app=app,
         )
+        cls.check_user_verification_status(user=user, raise_exception=True)
 
         refresh = RefreshToken.for_user(user)
         refresh["email"] = user.email
@@ -102,15 +128,62 @@ class AuthService:
         )
         return user
 
-    def update_user(self, user_id: str, **validated_data) -> User:
-        user = User.objects.get(id=user_id)
+    @classmethod
+    def update_user(cls, user_id: str, **validated_data) -> User:
+        user = cls.get_user_by_id(user_id)
+        cls.check_user_verification_status(user=user, raise_exception=True)
         for key, value in validated_data.items():
             setattr(user, key, value)
         user.save()
         return user
 
-    def delete_user(self, user_id: str) -> None:
+    @classmethod
+    def delete_user(cls, user_id: str) -> None:
         user = User.objects.filter(id=user_id).first()
         if user:
             user.delete()
         raise UserDoesNotExistException
+
+    @classmethod
+    def send_verification_email(
+        cls,
+        user: User = None,
+        app: Application = None,
+        domain: str = None,
+        protocol: str = None,
+    ) -> None:
+        mail_subject = "Activate your account"
+        token = OneTimeJWTToken.obtain(
+            payload={
+                "user_id": str(user.pk),
+            },
+            lifetime=30,
+        )
+        verify_url = f"{protocol}://{domain}/one-time/verify-email/?token={token}"
+        print(verify_url)
+        message = render_to_string(
+            "email_verification_mail.html",
+            {"user": user, "verify_url": verify_url, "app": app},
+        )
+
+        email = EmailMessage(subject=mail_subject, body=message, to=[user.email])
+        email.content_subtype = "html"
+        try:
+            email.send()
+        except Exception as e:
+            print(e.__traceback__)
+            raise VerificationEmailSendingFailedException
+
+    @classmethod
+    def perform_email_verification(cls, token: str) -> None:
+        if not token:
+            raise OneTimeTokenInvalidException
+        try:
+            token = OneTimeJWTToken.verify(token)
+            user = cls.get_user_by_id(token.get("user_id"))
+            # set user as verified and active once the email is verified
+            user.is_active = True
+            user.verified = True
+            user.save()
+        except Exception as e:
+            raise e

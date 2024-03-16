@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
+    "rest_framework",
     "rest_framework_simplejwt",
     "wakka",
 ]
@@ -165,7 +166,7 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=10),
     "REFRESH_TOKEN_LIFETIME": datetime.timedelta(days=5),
     "UPDATE_LAST_LOGIN": True,
-    "ISSUER": "Wakka Auth",
+    "ISSUER": "wakka-uth",
     # Crypto settings
     "ALGORITHM": "RS512",
     "SIGNING_KEY": ENV.JWT_PRIVATE_KEY.replace("\\r", "")
@@ -175,3 +176,13 @@ SIMPLE_JWT = {
     .replace("\/", "/")
     .replace("\\n", "\n"),
 }
+
+# ------------------- EMAILING SETTINGS -------------------
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = ENV.EMAIL_HOST
+EMAIL_FROM = ENV.EMAIL_FROM
+EMAIL_HOST_USER = ENV.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = ENV.EMAIL_HOST_PASSWORD
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True

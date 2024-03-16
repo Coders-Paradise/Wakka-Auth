@@ -68,7 +68,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=40, blank=True)
     date_joined = models.DateTimeField(auto_now_add=True)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(
+        default=False
+    )  # User is active only after email verification
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
@@ -104,3 +106,9 @@ class User(AbstractBaseUser, PermissionsMixin):
             username = f"{self.app.app_name}$${self.email}".lower()
             self.username = username
         return super().save(*args, **kwargs)
+
+
+class OnetimeTokenRecords(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    jti = models.CharField(max_length=255, unique=True)
+    expires_at = models.DateTimeField()
