@@ -29,10 +29,11 @@ class Application(models.Model):
     server_api_key_hash = models.CharField(max_length=255, blank=True)
     objects = AppManager()
 
-    def generate_server_api_key(self):
+    def generate_server_api_key(self, save=True):
         self.server_api_key = get_random_secret_key()
         self.server_api_key_hash = make_password(self.server_api_key)
-        self.save()
+        if save:
+            self.save()
 
     def nullify_server_api_key(self):
         self.server_api_key = None
@@ -55,7 +56,7 @@ class Application(models.Model):
         self.full_clean()
         # If the hash is empty, generate a new server api key, hash pair
         if not self.server_api_key_hash:
-            self.generate_server_api_key()
+            self.generate_server_api_key(save=False)
         return super().save(*args, **kwargs)
 
     def __str__(self):
