@@ -1,0 +1,4 @@
+- LRU based Token Rotation
+- Message queue for asynchronous activities
+- Reset Password Functionality
+- Meta tag for user (if needed)
