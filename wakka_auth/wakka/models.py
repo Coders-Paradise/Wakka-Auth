@@ -53,6 +53,7 @@ class Application(models.Model):
     def delete(self) -> tuple[int, dict[str, int]]:
         self.app_name = f"{self.app_name}$$deleted"
         self.deleted_at = timezone.now()
+        self.save()
 
     def save(self, *args, **kwargs):
         self.full_clean()

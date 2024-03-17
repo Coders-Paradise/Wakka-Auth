@@ -2,6 +2,7 @@ from typing import Any, Mapping
 
 from django.contrib.auth.models import update_last_login
 from django.core.mail import EmailMessage
+from django.db import connection
 from django.template.loader import render_to_string
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -23,6 +24,19 @@ from .utils import OneTimeJWTToken
 
 
 class AuthService:
+    @classmethod
+    def health_check(cls) -> Mapping[str, bool]:
+        conn = False
+        try:
+            User.objects.count()
+            conn = True
+        except Exception as e:
+            pass
+        status = {
+            "database": conn,
+            "server": True,
+        }
+        return status
 
     @classmethod
     def get_user_by_id(cls, user_id: str) -> User:

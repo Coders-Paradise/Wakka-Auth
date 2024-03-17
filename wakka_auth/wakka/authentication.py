@@ -32,6 +32,8 @@ class WakkaServerAuthentication(BaseAuthentication):
     If the server api key is invalid, it raises an InvalidServerApiKeyException."""
 
     def authenticate(self, request: HttpRequest):
+        # the app_name attribute should be set by the WakkaAppNameAuthentication
+        # that's why the order of the authentications is important
         if not hasattr(request, "app_name"):
             raise InvalidAppNameException
         app: Application = request.app

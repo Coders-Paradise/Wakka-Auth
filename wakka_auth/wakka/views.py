@@ -27,9 +27,16 @@ from .services import AuthService
 from .utils import WakkaResponse
 
 
+class HealthCheckView(APIView):
+    def get(self, request: Request):
+        status = AuthService.health_check()
+        serializer = serializers.HealthCheckResponseSerializer(status)
+        return WakkaResponse(serializer.data)
+
+
 @extend_schema(tags=["Test"])
 class TestApiView(APIView):
-    authentication_classes = [WakkaServerAuthentication]
+    authentication_classes = [WakkaAppNameAuthentication, WakkaServerAuthentication]
 
     def get(self, request: Request):
         return WakkaResponse({"message": "OK"})

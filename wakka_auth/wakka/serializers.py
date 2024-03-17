@@ -8,6 +8,11 @@ from rest_framework_simplejwt.tokens import Token
 from .models import User
 
 
+class HealthCheckResponseSerializer(serializers.Serializer):
+    database = serializers.BooleanField()
+    server = serializers.BooleanField()
+
+
 class TokenPairRequestSeralizer(serializers.Serializer):
     email = serializers.CharField()
     password = serializers.CharField()
