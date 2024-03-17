@@ -13,12 +13,12 @@ class ErrorCode(Enum):
     ONE_TIME_TOKEN_INVALID = "ONE_TIME_TOKEN_INVALID"
     ONE_TIME_TOKEN_EXPIRED = "ONE_TIME_TOKEN_EXPIRED"
     USER_NOT_VERIFIED = "USER_NOT_VERIFIED"
-    PASSWORD_RESET_EMAIL_SENDING_FAILED = "PASSWORD_RESET_EMAIL_SENDING_FAILED"
+    FORGOT_PASSWORD_EMAIL_SENDING_FAILED = "FORGOT_PASSWORD_EMAIL_SENDING_FAILED"
     USER_NOT_ACTIVE = "USER_NOT_ACTIVE"
 
 
 class OneTimeTokenType(Enum):
-    RESET_PASSWORD = "RESET_PASSWORD"
+    FOROGT_PASSWORD = "FOROGT_PASSWORD"
     EMAIL_VERIFICATION = "EMAIL_VERIFICATION"
 
 
@@ -37,20 +37,20 @@ VERIFICATION_SUCCESS_DESCRIPTION: str = (
     "Your email has been successfully verified. Please close this tab and continue with the application."
 )
 
-PASSWORD_RESET_EXPIRED_LINK_TITLE: str = "Expired Password Reset Link"
-PASSWORD_RESET_EXPIRED_LINK_DESCRIPTION: str = (
+FORGOT_PASSWORD_EXPIRED_LINK_TITLE: str = "Expired Password Reset Link"
+FORGOT_PASSWORD_EXPIRED_LINK_DESCRIPTION: str = (
     "The password reset link is either expired. Please request a new password reset link."
 )
-PASSWORD_RESET_INVALID_LINK_TITLE: str = "Invalid Password Reset Link"
-PASSWORD_RESET_INVALID_LINK_DESCRIPTION: str = (
+FORGOT_PASSWORD_INVALID_LINK_TITLE: str = "Invalid Password Reset Link"
+FORGOT_PASSWORD_INVALID_LINK_DESCRIPTION: str = (
     "The password reset link is invalid. Please request a new password reset link."
 )
-PASSWORD_RESET_SUCCESS_TITLE: str = "Password Reset Successful"
-PASSWORD_RESET_SUCCESS_DESCRIPTION: str = (
+FORGOT_PASSWORD_SUCCESS_TITLE: str = "Password Reset Successful"
+FORGOT_PASSWORD_SUCCESS_DESCRIPTION: str = (
     "Your password has been successfully reset. Please close this tab and continue with the application."
 )
 
-PASSWORD_RESET_FORM_TITLE: str = "Reset Password"
+FORGOT_PASSWORD_FORM_TITLE: str = "Reset Password"
 
 # Onetime Token Expiry in minutes
 ONE_TIME_TOKEN_EXPIRY: int = 30

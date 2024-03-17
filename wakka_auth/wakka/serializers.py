@@ -133,11 +133,11 @@ class EmailVerificationRequestSerializer(serializers.Serializer):
     user_id = serializers.CharField()
 
 
-class PasswordResetRequestSerializer(serializers.Serializer):
+class ForgotPasswordRequestSerializer(serializers.Serializer):
     email = serializers.CharField()
 
 
-class PasswordResetFormSerializer(serializers.Serializer):
+class ForgotPasswordFormSerializer(serializers.Serializer):
     new_password = serializers.CharField()
     confirm_password = serializers.CharField()
     token = serializers.CharField()

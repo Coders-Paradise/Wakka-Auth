@@ -8,11 +8,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .constants import ONE_TIME_TOKEN_EXPIRY, OneTimeTokenType
 from .exceptions import (
+    ForgotPasswordEmailSendingFailedException,
     InvalidAppNameException,
     InvalidCredentialsException,
     InvalidRefreshTokenException,
     OneTimeTokenInvalidException,
-    PasswordResetEmailSendingFailedException,
     UserAlreadyExistsException,
     UserDoesNotExistException,
     UserNotActiveException,
@@ -119,9 +119,12 @@ class AuthService:
     @classmethod
     def get_access_token(cls, refresh_token: str = None) -> dict:
         if refresh_token:
-            refresh_token = RefreshToken(refresh_token)
-            refresh_token.verify()
-            user = User.objects.get(id=access_token.get("user_id"))
+            try:
+                refresh_token = RefreshToken(refresh_token)
+                refresh_token.verify()
+            except Exception as e:
+                raise InvalidRefreshTokenException
+            user = User.objects.get(id=refresh_token.get("user_id"))
             cls.check_user_verification_status(user=user, raise_exception=True)
             cls.check_user_active_status(user=user, raise_exception=True)
             access_token = refresh_token.access_token
@@ -220,7 +223,7 @@ class AuthService:
             raise e
 
     @classmethod
-    def send_password_reset_email(
+    def send_forgot_password_email(
         cls,
         user: User = None,
         app: Application = None,
@@ -229,11 +232,11 @@ class AuthService:
     ) -> None:
         mail_subject = "Reset your Password"
         token = cls.generate_one_time_verification_token(
-            user=user, type=OneTimeTokenType.RESET_PASSWORD.value
+            user=user, type=OneTimeTokenType.FOROGT_PASSWORD.value
         )
-        reset_url = f"{protocol}://{domain}/one-time/reset-password/?token={token}"
+        reset_url = f"{protocol}://{domain}/one-time/forgot-password/?token={token}"
         message = render_to_string(
-            "password_reset_mail.html",
+            "forgot_password_mail.html",
             {"user": user, "reset_url": reset_url, "app": app},
         )
 
@@ -243,15 +246,15 @@ class AuthService:
             email.send()
         except Exception as e:
             print(e.__traceback__)
-            raise PasswordResetEmailSendingFailedException
+            raise ForgotPasswordEmailSendingFailedException
 
     @classmethod
-    def validate_reset_password_token(cls, token: str) -> Mapping[str, Any]:
+    def validate_forgot_password_token(cls, token: str) -> Mapping[str, Any]:
         if not token:
             raise OneTimeTokenInvalidException
         try:
             payload = OneTimeJWTToken.verify(token)
-            if payload["type"] != OneTimeTokenType.RESET_PASSWORD.value:
+            if payload["type"] != OneTimeTokenType.FOROGT_PASSWORD.value:
                 raise OneTimeTokenInvalidException
             return payload
         except Exception as e:

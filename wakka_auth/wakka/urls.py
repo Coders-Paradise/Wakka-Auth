@@ -26,7 +26,7 @@ verify_urlpatterns = [
     ),
     path(
         "reset-password/",
-        views.PasswordResetPageView.as_view(),
+        views.ForgotPasswordPageView.as_view(),
         name="reset-password",
     ),
 ]
@@ -38,9 +38,9 @@ mail_urlpatterns = [
         name="send-verification-email",
     ),
     path(
-        "send-password-reset-email/",
-        views.PasswordResetSendView.as_view(),
-        name="send-password-reset-email",
+        "send-forgot-password-email/",
+        views.ForgotPasswordSendView.as_view(),
+        name="send-forgot-password-email",
     ),
 ]
 

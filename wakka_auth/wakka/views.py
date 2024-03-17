@@ -7,13 +7,13 @@ from rest_framework.views import APIView
 from . import serializers
 from .authentication import WakkaAppNameAuthentication, WakkaServerAuthentication
 from .constants import (
-    PASSWORD_RESET_EXPIRED_LINK_DESCRIPTION,
-    PASSWORD_RESET_EXPIRED_LINK_TITLE,
-    PASSWORD_RESET_FORM_TITLE,
-    PASSWORD_RESET_INVALID_LINK_DESCRIPTION,
-    PASSWORD_RESET_INVALID_LINK_TITLE,
-    PASSWORD_RESET_SUCCESS_DESCRIPTION,
-    PASSWORD_RESET_SUCCESS_TITLE,
+    FORGOT_PASSWORD_EXPIRED_LINK_DESCRIPTION,
+    FORGOT_PASSWORD_EXPIRED_LINK_TITLE,
+    FORGOT_PASSWORD_FORM_TITLE,
+    FORGOT_PASSWORD_INVALID_LINK_DESCRIPTION,
+    FORGOT_PASSWORD_INVALID_LINK_TITLE,
+    FORGOT_PASSWORD_SUCCESS_DESCRIPTION,
+    FORGOT_PASSWORD_SUCCESS_TITLE,
     VERIFICATION_EXPIRED_LINK_DESCRIPTION,
     VERIFICATION_EXPIRED_LINK_TITLE,
     VERIFICATION_INVALID_LINK_DESCRIPTION,
@@ -197,23 +197,23 @@ class EmailVerificationSendView(APIView):
         return WakkaResponse(status=status.HTTP_200_OK)
 
 
-@extend_schema(tags=["Password Reset"])
-class PasswordResetSendView(APIView):
+@extend_schema(tags=["Forgot Password"])
+class ForgotPasswordSendView(APIView):
     authentication_classes = [WakkaAppNameAuthentication]
 
     @extend_schema(
-        request=serializers.PasswordResetRequestSerializer,
+        request=serializers.ForgotPasswordRequestSerializer,
         responses={status.HTTP_200_OK: None},
     )
     def post(self, request: Request, *args, **kwargs):
-        serializer = serializers.PasswordResetRequestSerializer(data=request.data)
+        serializer = serializers.ForgotPasswordRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = AuthService.get_user_by_email(
             email=serializer.validated_data["email"],
             app=request.app,
         )
         if user:
-            AuthService.send_password_reset_email(
+            AuthService.send_FORGOT_password_email(
                 user=user,
                 app=user.app,
                 domain=request.get_host(),
@@ -223,29 +223,29 @@ class PasswordResetSendView(APIView):
         return WakkaResponse(status=status.HTTP_200_OK)
 
 
-@extend_schema(tags=["Password Reset"])
-class PasswordResetPageView(APIView):
+@extend_schema(tags=["Forgot Password"])
+class ForgotPasswordPageView(APIView):
 
     @extend_schema(
-        description="Password reset page",
+        description="Forgot Password page",
     )
     def get(self, request: Request, *args, **kwargs):
         try:
             token = request.GET.get("token")
-            payload = AuthService.validate_reset_password_token(token=token)
+            payload = AuthService.validate_forgot_password_token(token=token)
             # get the user in the payload and generate a new token for the form
             # which will be used to reset the password
             user = AuthService.get_user_by_id(payload.get("user_id"))
             reset_password_form_token = (
                 AuthService.generate_one_time_verification_token(
-                    user=user, type=OneTimeTokenType.RESET_PASSWORD.value
+                    user=user, type=OneTimeTokenType.FOROGT_PASSWORD.value
                 )
             )
             return render(
                 request,
-                "password_reset_page.html",
+                "forgot_password_page.html",
                 {
-                    "title": PASSWORD_RESET_FORM_TITLE,
+                    "title": FORGOT_PASSWORD_FORM_TITLE,
                     "description": None,
                     "type": "FORM",
                     "token": reset_password_form_token,
@@ -255,10 +255,10 @@ class PasswordResetPageView(APIView):
         except OneTimeTokenExpiredException:
             return render(
                 request,
-                "password_reset_page.html",
+                "forgot_password_page.html",
                 {
-                    "title": PASSWORD_RESET_EXPIRED_LINK_TITLE,
-                    "description": PASSWORD_RESET_EXPIRED_LINK_DESCRIPTION,
+                    "title": FORGOT_PASSWORD_EXPIRED_LINK_TITLE,
+                    "description": FORGOT_PASSWORD_EXPIRED_LINK_DESCRIPTION,
                     "type": "ERROR",
                 },
                 status=400,
@@ -266,10 +266,10 @@ class PasswordResetPageView(APIView):
         except OneTimeTokenInvalidException:
             return render(
                 request,
-                "password_reset_page.html",
+                "forgot_password_page.html",
                 {
-                    "title": PASSWORD_RESET_INVALID_LINK_TITLE,
-                    "description": PASSWORD_RESET_INVALID_LINK_DESCRIPTION,
+                    "title": FORGOT_PASSWORD_INVALID_LINK_TITLE,
+                    "description": FORGOT_PASSWORD_INVALID_LINK_DESCRIPTION,
                     "type": "ERROR",
                 },
                 status=400,
@@ -278,19 +278,19 @@ class PasswordResetPageView(APIView):
             raise e
 
     @extend_schema(
-        request=serializers.PasswordResetFormSerializer,
+        request=serializers.ForgotPasswordFormSerializer,
         responses={status.HTTP_200_OK: None},
-        description="Used by password reset page to reset password.",
+        description="Used by forgot password page to reset password.",
     )
     def post(self, request: Request, *args, **kwargs):
-        serializer = serializers.PasswordResetFormSerializer(data=request.data)
+        serializer = serializers.ForgotPasswordFormSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         try:
             token = serializer.validated_data["token"]
             password = serializer.validated_data["new_password"]
             # Validate the token and get the user, then change the password
-            payload = AuthService.validate_reset_password_token(token=token)
+            payload = AuthService.validate_forgot_password_token(token=token)
             user = AuthService.get_user_by_id(user_id=payload.get("user_id"))
             AuthService.change_password(
                 user=user,
@@ -298,10 +298,10 @@ class PasswordResetPageView(APIView):
             )
             return render(
                 request,
-                "password_reset_page.html",
+                "forgot_password_page.html",
                 {
-                    "title": PASSWORD_RESET_SUCCESS_TITLE,
-                    "description": PASSWORD_RESET_SUCCESS_DESCRIPTION,
+                    "title": FORGOT_PASSWORD_SUCCESS_TITLE,
+                    "description": FORGOT_PASSWORD_SUCCESS_DESCRIPTION,
                     "type": "SUCCESS",
                 },
                 status=200,
@@ -309,10 +309,10 @@ class PasswordResetPageView(APIView):
         except OneTimeTokenExpiredException:
             return render(
                 request,
-                "password_reset_page.html",
+                "forgot_password_page.html",
                 {
-                    "title": PASSWORD_RESET_EXPIRED_LINK_TITLE,
-                    "description": PASSWORD_RESET_EXPIRED_LINK_DESCRIPTION,
+                    "title": FORGOT_PASSWORD_EXPIRED_LINK_TITLE,
+                    "description": FORGOT_PASSWORD_EXPIRED_LINK_DESCRIPTION,
                     "type": "ERROR",
                 },
                 status=400,
@@ -320,10 +320,10 @@ class PasswordResetPageView(APIView):
         except OneTimeTokenInvalidException:
             return render(
                 request,
-                "password_reset_page.html",
+                "forgot_password_page.html",
                 {
-                    "title": PASSWORD_RESET_INVALID_LINK_TITLE,
-                    "description": PASSWORD_RESET_INVALID_LINK_DESCRIPTION,
+                    "title": FORGOT_PASSWORD_INVALID_LINK_TITLE,
+                    "description": FORGOT_PASSWORD_INVALID_LINK_DESCRIPTION,
                     "type": "ERROR",
                 },
                 status=400,

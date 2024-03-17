@@ -94,10 +94,10 @@ class VerificationEmailSendingFailedException(BaseException):
         super().__init__(self.message, self.status_code, self.code)
 
 
-class PasswordResetEmailSendingFailedException(BaseException):
-    message = "Password reset email sending failed"
+class ForgotPasswordEmailSendingFailedException(BaseException):
+    message = "Forgot password email sending failed"
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-    code = ErrorCode.PASSWORD_RESET_EMAIL_SENDING_FAILED.value
+    code = ErrorCode.FORGOT_PASSWORD_EMAIL_SENDING_FAILED.value
 
     def __init__(self):
         super().__init__(self.message, self.status_code, self.code)
