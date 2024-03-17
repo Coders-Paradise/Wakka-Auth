@@ -126,3 +126,22 @@ class UserResponseSerializer(serializers.ModelSerializer):
 
 class EmailVerificationRequestSerializer(serializers.Serializer):
     user_id = serializers.CharField()
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.CharField()
+
+
+class PasswordResetFormSerializer(serializers.Serializer):
+    new_password = serializers.CharField()
+    confirm_password = serializers.CharField()
+    token = serializers.CharField()
+
+    def validate(self, attrs):
+        if attrs["new_password"] != attrs["confirm_password"]:
+            raise serializers.ValidationError("Passwords do not match")
+        try:
+            validate_password(attrs["new_password"])
+        except Exception as e:
+            raise serializers.ValidationError(e)
+        return super().validate(attrs)

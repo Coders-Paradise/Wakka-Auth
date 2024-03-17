@@ -1,4 +1,4 @@
-from typing import Iterable
+import re
 from uuid import uuid4
 
 from django.contrib.auth.hashers import make_password
@@ -42,8 +42,10 @@ class Application(models.Model):
     def clean(self):
         if not self.app_name.islower():
             raise ValidationError("App name must be in lowercase")
-        if not self.app_name.isalnum():
-            raise ValidationError("App name must contain only letters and numbers")
+        if not re.match("^[a-z0-9_]*$", self.app_name):
+            raise ValidationError(
+                "App name must contain only lowercase letters, numbers, and underscores"
+            )
         if " " in self.app_name:
             raise ValidationError("App name must not contain spaces")
         return super().clean()
@@ -78,7 +80,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     app = models.ForeignKey(Application, on_delete=models.CASCADE)
     verified = models.BooleanField(default=False)
     USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["email"]
+    REQUIRED_FIELDS = ["email", "name"]
 
     objects = UserManager()
 

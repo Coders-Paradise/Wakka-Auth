@@ -41,12 +41,16 @@ class UserManager(BaseUserManager):
 
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
 
         # Superuser always belong to the administration app
         app = Application.objects.get_or_create(
-            app_name="administration", title="Administration"
+            app_name="wakka_administration", title="Wakka Administration"
         )[0]
         extra_fields.setdefault("app", app)
+
+        if self.get_queryset().filter(email=email, app=app).exists():
+            raise ValueError("Superuser already exists")
 
         if extra_fields.get("is_staff") is not True:
             raise ValueError("Superuser must have is_staff=True.")

@@ -1,12 +1,37 @@
 import datetime
+from typing import Any, Mapping
 from uuid import uuid4
 
 import jwt
 from django.conf import settings
 from django.utils import timezone
+from rest_framework.response import Response
 
 from .exceptions import OneTimeTokenExpiredException, OneTimeTokenInvalidException
 from .models import OnetimeTokenRecords
+
+
+class WakkaResponse(Response):
+
+    def __init__(
+        self,
+        data=None,
+        status=None,
+        template_name=None,
+        headers=None,
+        exception=False,
+        content_type=None,
+    ):
+        """
+        Restructuring the data to be returned in the response
+        Schema: {
+            "data": data,
+            "status": status
+        }"""
+        if status:
+            actual_data = data
+            data = {"data": actual_data, "status": status}
+        super().__init__(data, status, template_name, headers, exception, content_type)
 
 
 class OneTimeJWTToken:
@@ -32,7 +57,7 @@ class OneTimeJWTToken:
         return token
 
     @classmethod
-    def verify(cls, token: str) -> dict:
+    def verify(cls, token: str) -> Mapping[str, Any]:
         """Verify a one time jwt token"""
         try:
             payload = jwt.decode(

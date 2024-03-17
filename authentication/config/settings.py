@@ -149,6 +149,7 @@ AUTH_USER_MODEL = "wakka.User"
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [],
+    "EXCEPTION_HANDLER": "wakka.exceptions.wakka_exception_handler",
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],

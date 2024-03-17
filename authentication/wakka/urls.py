@@ -1,6 +1,5 @@
-from django.urls import include, path
-
 from config.constants import API_URL, VERIFY_URL
+from django.urls import include, path
 
 from . import views
 
@@ -22,16 +21,26 @@ user_urlpatterns = [
 verify_urlpatterns = [
     path(
         "verify-email/",
-        views.EmailVerificationResponseView.as_view(),
+        views.EmailVerificationPageView.as_view(),
         name="verify-email",
+    ),
+    path(
+        "reset-password/",
+        views.PasswordResetPageView.as_view(),
+        name="reset-password",
     ),
 ]
 
 mail_urlpatterns = [
     path(
-        "resend-verification-email/",
-        views.EmailVerificationResendView.as_view(),
-        name="resend-verification-email",
+        "send-verification-email/",
+        views.EmailVerificationSendView.as_view(),
+        name="send-verification-email",
+    ),
+    path(
+        "send-password-reset-email/",
+        views.PasswordResetSendView.as_view(),
+        name="send-password-reset-email",
     ),
 ]
 

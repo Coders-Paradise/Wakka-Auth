@@ -2,21 +2,29 @@ from django.shortcuts import render
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.request import Request
-from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from . import serializers
 from .authentication import WakkaAppNameAuthentication, WakkaServerAuthentication
 from .constants import (
+    PASSWORD_RESET_EXPIRED_LINK_DESCRIPTION,
+    PASSWORD_RESET_EXPIRED_LINK_TITLE,
+    PASSWORD_RESET_FORM_TITLE,
+    PASSWORD_RESET_INVALID_LINK_DESCRIPTION,
+    PASSWORD_RESET_INVALID_LINK_TITLE,
+    PASSWORD_RESET_SUCCESS_DESCRIPTION,
+    PASSWORD_RESET_SUCCESS_TITLE,
     VERIFICATION_EXPIRED_LINK_DESCRIPTION,
     VERIFICATION_EXPIRED_LINK_TITLE,
     VERIFICATION_INVALID_LINK_DESCRIPTION,
     VERIFICATION_INVALID_LINK_TITLE,
     VERIFICATION_SUCCESS_DESCRIPTION,
     VERIFICATION_SUCCESS_TITLE,
+    OneTimeTokenType,
 )
 from .exceptions import OneTimeTokenExpiredException, OneTimeTokenInvalidException
 from .services import AuthService
+from .utils import WakkaResponse
 
 
 @extend_schema(tags=["Test"])
@@ -24,7 +32,7 @@ class TestApiView(APIView):
     authentication_classes = [WakkaServerAuthentication]
 
     def get(self, request: Request):
-        return Response({"message": "OK"})
+        return WakkaResponse({"message": "OK"})
 
 
 @extend_schema(tags=["Client"])
@@ -42,7 +50,7 @@ class TokenObtainPairView(APIView):
             **serializer.validated_data, app=request.app
         )
         serializer = serializers.TokenPairResponseSerializer(token_pair)
-        return Response(serializer.data)
+        return WakkaResponse(serializer.data)
 
 
 @extend_schema(tags=["Client"])
@@ -58,7 +66,7 @@ class TokenRefreshView(APIView):
         serializer.is_valid(raise_exception=True)
         access_token = AuthService.get_access_token(**serializer.validated_data)
         serializer = serializers.TokenRefreshResponseSerializer(access_token)
-        return Response(serializer.data)
+        return WakkaResponse(serializer.data)
 
 
 @extend_schema(tags=["Server"])
@@ -75,7 +83,7 @@ class UserView(APIView):
         serializer.is_valid(raise_exception=True)
         user = AuthService.create_user(**serializer.validated_data, app=request.app)
         serializer = serializers.UserResponseSerializer(user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return WakkaResponse(serializer.data, status=status.HTTP_201_CREATED)
 
 
 @extend_schema(tags=["Server"])
@@ -95,7 +103,7 @@ class UserDetailView(APIView):
             protocol=request.scheme,
         )
         serializer = serializers.UserResponseSerializer(user)
-        return Response(serializer.data)
+        return WakkaResponse(serializer.data)
 
     @extend_schema(
         request=serializers.UserUpdateRequestSerializer,
@@ -107,27 +115,30 @@ class UserDetailView(APIView):
         serializer.is_valid(raise_exception=True)
         user = AuthService.update_user(user_id, **serializer.validated_data)
         serializer = serializers.UserResponseSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return WakkaResponse(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
         responses={status.HTTP_204_NO_CONTENT: None}, description="Delete user"
     )
     def delete(self, request: Request, user_id: str, *args, **kwargs):
         AuthService.delete_user(user_id)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return WakkaResponse(status=status.HTTP_204_NO_CONTENT)
 
 
 @extend_schema(tags=["Email Verification"])
-class EmailVerificationResponseView(APIView):
+class EmailVerificationPageView(APIView):
 
+    @extend_schema(
+        description="Email verification page",
+    )
     def get(self, request: Request, *args, **kwargs):
         try:
             token = request.GET.get("token")
-            AuthService.perform_email_verification(token=token)
+            AuthService.validate_email_verification_token(token=token)
         except OneTimeTokenExpiredException:
             return render(
                 request,
-                "email_verification_response.html",
+                "email_verification_page.html",
                 {
                     "title": VERIFICATION_EXPIRED_LINK_TITLE,
                     "description": VERIFICATION_EXPIRED_LINK_DESCRIPTION,
@@ -137,7 +148,7 @@ class EmailVerificationResponseView(APIView):
         except OneTimeTokenInvalidException:
             return render(
                 request,
-                "email_verification_response.html",
+                "email_verification_page.html",
                 {
                     "title": VERIFICATION_INVALID_LINK_TITLE,
                     "description": VERIFICATION_INVALID_LINK_DESCRIPTION,
@@ -146,7 +157,7 @@ class EmailVerificationResponseView(APIView):
             )
         return render(
             request,
-            "email_verification_response.html",
+            "email_verification_page.html",
             {
                 "title": VERIFICATION_SUCCESS_TITLE,
                 "description": VERIFICATION_SUCCESS_DESCRIPTION,
@@ -156,8 +167,14 @@ class EmailVerificationResponseView(APIView):
 
 
 @extend_schema(tags=["Email Verification"])
-class EmailVerificationResendView(APIView):
-    @extend_schema(request=serializers.EmailVerificationRequestSerializer)
+class EmailVerificationSendView(APIView):
+    authentication_classes = [WakkaAppNameAuthentication]
+
+    @extend_schema(
+        request=serializers.EmailVerificationRequestSerializer,
+        responses={status.HTTP_200_OK: None},
+        description="Send email verification link",
+    )
     def post(self, request: Request, *args, **kwargs):
         serializer = serializers.EmailVerificationRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -170,4 +187,139 @@ class EmailVerificationResendView(APIView):
             protocol=request.scheme,
         )
 
-        return Response(status=status.HTTP_200_OK)
+        return WakkaResponse(status=status.HTTP_200_OK)
+
+
+@extend_schema(tags=["Password Reset"])
+class PasswordResetSendView(APIView):
+    authentication_classes = [WakkaAppNameAuthentication]
+
+    @extend_schema(
+        request=serializers.PasswordResetRequestSerializer,
+        responses={status.HTTP_200_OK: None},
+    )
+    def post(self, request: Request, *args, **kwargs):
+        serializer = serializers.PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = AuthService.get_user_by_email(
+            email=serializer.validated_data["email"],
+            app=request.app,
+        )
+        if user:
+            AuthService.send_password_reset_email(
+                user=user,
+                app=user.app,
+                domain=request.get_host(),
+                protocol=request.scheme,
+            )
+
+        return WakkaResponse(status=status.HTTP_200_OK)
+
+
+@extend_schema(tags=["Password Reset"])
+class PasswordResetPageView(APIView):
+
+    @extend_schema(
+        description="Password reset page",
+    )
+    def get(self, request: Request, *args, **kwargs):
+        try:
+            token = request.GET.get("token")
+            payload = AuthService.validate_reset_password_token(token=token)
+            # get the user in the payload and generate a new token for the form
+            # which will be used to reset the password
+            user = AuthService.get_user_by_id(payload.get("user_id"))
+            reset_password_form_token = (
+                AuthService.generate_one_time_verification_token(
+                    user=user, type=OneTimeTokenType.RESET_PASSWORD.value
+                )
+            )
+            return render(
+                request,
+                "password_reset_page.html",
+                {
+                    "title": PASSWORD_RESET_FORM_TITLE,
+                    "description": None,
+                    "type": "FORM",
+                    "token": reset_password_form_token,
+                },
+                status=200,
+            )
+        except OneTimeTokenExpiredException:
+            return render(
+                request,
+                "password_reset_page.html",
+                {
+                    "title": PASSWORD_RESET_EXPIRED_LINK_TITLE,
+                    "description": PASSWORD_RESET_EXPIRED_LINK_DESCRIPTION,
+                    "type": "ERROR",
+                },
+                status=400,
+            )
+        except OneTimeTokenInvalidException:
+            return render(
+                request,
+                "password_reset_page.html",
+                {
+                    "title": PASSWORD_RESET_INVALID_LINK_TITLE,
+                    "description": PASSWORD_RESET_INVALID_LINK_DESCRIPTION,
+                    "type": "ERROR",
+                },
+                status=400,
+            )
+        except Exception as e:
+            raise e
+
+    @extend_schema(
+        request=serializers.PasswordResetFormSerializer,
+        responses={status.HTTP_200_OK: None},
+        description="Used by password reset page to reset password.",
+    )
+    def post(self, request: Request, *args, **kwargs):
+        serializer = serializers.PasswordResetFormSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            token = serializer.validated_data["token"]
+            password = serializer.validated_data["new_password"]
+            # Validate the token and get the user, then change the password
+            payload = AuthService.validate_reset_password_token(token=token)
+            user = AuthService.get_user_by_id(user_id=payload.get("user_id"))
+            AuthService.change_password(
+                user=user,
+                password=password,
+            )
+            return render(
+                request,
+                "password_reset_page.html",
+                {
+                    "title": PASSWORD_RESET_SUCCESS_TITLE,
+                    "description": PASSWORD_RESET_SUCCESS_DESCRIPTION,
+                    "type": "SUCCESS",
+                },
+                status=200,
+            )
+        except OneTimeTokenExpiredException:
+            return render(
+                request,
+                "password_reset_page.html",
+                {
+                    "title": PASSWORD_RESET_EXPIRED_LINK_TITLE,
+                    "description": PASSWORD_RESET_EXPIRED_LINK_DESCRIPTION,
+                    "type": "ERROR",
+                },
+                status=400,
+            )
+        except OneTimeTokenInvalidException:
+            return render(
+                request,
+                "password_reset_page.html",
+                {
+                    "title": PASSWORD_RESET_INVALID_LINK_TITLE,
+                    "description": PASSWORD_RESET_INVALID_LINK_DESCRIPTION,
+                    "type": "ERROR",
+                },
+                status=400,
+            )
+        except Exception as e:
+            raise e
