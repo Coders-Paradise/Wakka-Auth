@@ -171,10 +171,10 @@ SIMPLE_JWT = {
     # Crypto settings
     "ALGORITHM": "RS512",
     "SIGNING_KEY": ENV.JWT_PRIVATE_KEY.replace("\\r", "")
-    .replace("\/", "/")
+    .replace("\\/", "/")
     .replace("\\n", "\n"),
     "VERIFYING_KEY": ENV.JWT_PUBLIC_KEY.replace("\\r", "")
-    .replace("\/", "/")
+    .replace("\\/", "/")
     .replace("\\n", "\n"),
 }
 

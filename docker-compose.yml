@@ -1,0 +1,46 @@
+version: '1.0'
+name: wakka_auth
+
+services:
+  wakka_app:
+    env_file:
+      - .env.docker
+    build:
+      context: ./wakka_auth
+      dockerfile: ./Dockerfile
+    ports:
+      - 8000:8000
+    depends_on:
+      - wakka_db
+
+  wakka_db:
+    image: mysql
+    env_file:
+      - .env.docker
+    ports:
+      - 3306:3306
+    volumes:
+      - wakka_db:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=${WAKKA_DB_NAME}
+      - MYSQL_USER=${WAKKA_DB_USER}
+      - MYSQL_PASSWORD=${WAKKA_DB_PASS}
+      - MYSQL_ROOT_PASSWORD=${WAKKA_DB_PASS}
+    restart: always
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_HOST=wakka_db
+      - PMA_PORT=3306
+    ports:
+      - 8080:80
+    restart: always
+    depends_on:
+      - wakka_db
+
+volumes:
+  wakka_db:
+
+
+    
