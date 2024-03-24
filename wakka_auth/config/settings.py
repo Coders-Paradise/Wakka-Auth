@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "rest_framework",
-    "rest_framework_simplejwt",
     "wakka",
 ]
 
@@ -163,10 +162,10 @@ SPECTACULAR_SETTINGS = {
 }
 
 # ------------------- JWT SETTINGS -------------------
-SIMPLE_JWT = {
+JWT_SETTINGS = {
     "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=10),
     "REFRESH_TOKEN_LIFETIME": datetime.timedelta(days=5),
-    "UPDATE_LAST_LOGIN": True,
+    "ONE_TIME_TOKEN_LIFETIME": datetime.timedelta(minutes=30),
     "ISSUER": "wakka-uth",
     # Crypto settings
     "ALGORITHM": "RS512",

@@ -2,14 +2,11 @@ from typing import Any, Mapping
 
 from django.contrib.auth.models import update_last_login
 from django.core.mail import EmailMessage
-from django.db import connection
 from django.template.loader import render_to_string
-from rest_framework_simplejwt.tokens import RefreshToken
 
-from .constants import ONE_TIME_TOKEN_EXPIRY, OneTimeTokenType
+from .constants import OneTimeTokenType
 from .exceptions import (
     ForgotPasswordEmailSendingFailedException,
-    InvalidAppNameException,
     InvalidCredentialsException,
     InvalidRefreshTokenException,
     OneTimeTokenInvalidException,
@@ -20,7 +17,7 @@ from .exceptions import (
     VerificationEmailSendingFailedException,
 )
 from .models import Application, User
-from .utils import OneTimeJWTToken
+from .tokens import JWTToken, OneTimeJWTToken
 
 
 class AuthService:
@@ -105,32 +102,30 @@ class AuthService:
         cls.check_user_verification_status(user=user, raise_exception=True)
         cls.check_user_active_status(user=user, raise_exception=True)
 
-        refresh = RefreshToken.for_user(user)
-        refresh["email"] = user.email
-        refresh["name"] = user.name
-        refresh["app"] = user.app.app_name
+        refresh_token = JWTToken.obtain_refresh_token_for_user(user=user)
+        access_token = JWTToken.obtain_access_token_by_refresh_token(refresh_token)
         update_last_login(None, user)
 
         return {
-            "refresh_token": str(refresh),
-            "access_token": str(refresh.access_token),
+            "refresh_token": refresh_token,
+            "access_token": access_token,
         }
 
     @classmethod
     def get_access_token(cls, refresh_token: str = None) -> dict:
         if refresh_token:
             try:
-                refresh_token = RefreshToken(refresh_token)
-                refresh_token.verify()
+                access_token = JWTToken.obtain_access_token_by_refresh_token(
+                    refresh_token
+                )
             except Exception as e:
                 raise InvalidRefreshTokenException
             user = User.objects.get(id=refresh_token.get("user_id"))
             cls.check_user_verification_status(user=user, raise_exception=True)
             cls.check_user_active_status(user=user, raise_exception=True)
-            access_token = refresh_token.access_token
             # Updating the last login time
             update_last_login(None, user=user)
-            return {"access_token": str(access_token)}
+            return {"access_token": access_token}
         raise InvalidRefreshTokenException
 
     @classmethod
@@ -269,8 +264,7 @@ class AuthService:
                 "user_id": str(user.pk),
                 "app_id": str(user.app.pk),
                 "type": type,
-            },
-            lifetime=ONE_TIME_TOKEN_EXPIRY,
+            }
         )
         return token
 

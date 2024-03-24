@@ -20,6 +20,9 @@ class BaseEnv:
     EMAIL_HOST_USER = "example@gmail.com"
     EMAIL_HOST_PASSWORD = "pass"
 
+    SINGLE_APP = "false"
+    APP_NAME = "app"
+
 
 class ENV(BaseEnv):
 

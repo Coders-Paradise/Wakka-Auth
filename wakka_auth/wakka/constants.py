@@ -22,9 +22,14 @@ class OneTimeTokenType(Enum):
     EMAIL_VERIFICATION = "EMAIL_VERIFICATION"
 
 
+class AuthTokenType(Enum):
+    ACCESS_TOKEN = "ACCESS_TOKEN"
+    REFRESH_TOKEN = "REFRESH_TOKEN"
+
+
 VERIFICATION_EXPIRED_LINK_TITLE: str = "Expired Email Verification Link"
 VERIFICATION_EXPIRED_LINK_DESCRIPTION: str = (
-    "The verification link is either expired. Please request a new verification link."
+    "The verification link is expired. Please request a new verification link."
 )
 
 VERIFICATION_INVALID_LINK_TITLE: str = "Invalid Email Verification Link"
@@ -39,7 +44,7 @@ VERIFICATION_SUCCESS_DESCRIPTION: str = (
 
 FORGOT_PASSWORD_EXPIRED_LINK_TITLE: str = "Expired Password Reset Link"
 FORGOT_PASSWORD_EXPIRED_LINK_DESCRIPTION: str = (
-    "The password reset link is either expired. Please request a new password reset link."
+    "The password reset link is expired. Please request a new password reset link."
 )
 FORGOT_PASSWORD_INVALID_LINK_TITLE: str = "Invalid Password Reset Link"
 FORGOT_PASSWORD_INVALID_LINK_DESCRIPTION: str = (
@@ -52,5 +57,4 @@ FORGOT_PASSWORD_SUCCESS_DESCRIPTION: str = (
 
 FORGOT_PASSWORD_FORM_TITLE: str = "Reset Password"
 
-# Onetime Token Expiry in minutes
-ONE_TIME_TOKEN_EXPIRY: int = 30
+
