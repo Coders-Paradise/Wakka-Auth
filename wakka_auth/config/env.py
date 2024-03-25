@@ -23,6 +23,8 @@ class BaseEnv:
     SINGLE_APP = "false"
     APP_NAME = "app"
 
+    ADMIN_PORTAL_PATH = "admin"
+
 
 class ENV(BaseEnv):
 

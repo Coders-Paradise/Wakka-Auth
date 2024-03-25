@@ -44,9 +44,6 @@ class WakkaServerAuthentication(BaseAuthentication):
     def authenticate(self, request: HttpRequest):
         # the app_name attribute should be set by the WakkaAppNameAuthentication
         # that's why the order of the authentications is important
-        if ENV.SINGLE_APP == "true":
-            return None
-
         if not hasattr(request, "app_name"):
             raise InvalidAppNameException
         app: Application = request.app

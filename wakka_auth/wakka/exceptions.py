@@ -137,3 +137,11 @@ class UserNotActiveException(BaseException):
 
     def __init__(self):
         super().__init__(self.message, self.status_code, self.code)
+
+class EmailAlreadyVerifiedException(BaseException):
+    message = "Email is already verified"
+    status_code = status.HTTP_400_BAD_REQUEST
+    code = ErrorCode.EMAIL_ALREADY_VERIFIED.value
+
+    def __init__(self):
+        super().__init__(self.message, self.status_code, self.code)

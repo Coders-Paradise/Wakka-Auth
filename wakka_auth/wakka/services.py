@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 
 from .constants import OneTimeTokenType
 from .exceptions import (
+    EmailAlreadyVerifiedException,
     ForgotPasswordEmailSendingFailedException,
     InvalidCredentialsException,
     InvalidRefreshTokenException,
@@ -183,6 +184,10 @@ class AuthService:
         domain: str = None,
         protocol: str = None,
     ) -> None:
+        # Raise error if the user is already verified
+        if user.verified:
+            raise EmailAlreadyVerifiedException
+        
         mail_subject = "Activate your account"
         token = cls.generate_one_time_verification_token(
             user=user, type=OneTimeTokenType.EMAIL_VERIFICATION.value
