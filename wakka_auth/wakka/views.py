@@ -7,19 +7,13 @@ from rest_framework.views import APIView
 from . import serializers
 from .authentication import WakkaAppNameAuthentication, WakkaServerAuthentication
 from .constants import (
-    FORGOT_PASSWORD_EXPIRED_LINK_DESCRIPTION,
-    FORGOT_PASSWORD_EXPIRED_LINK_TITLE,
-    FORGOT_PASSWORD_FORM_TITLE,
-    FORGOT_PASSWORD_INVALID_LINK_DESCRIPTION,
-    FORGOT_PASSWORD_INVALID_LINK_TITLE,
-    FORGOT_PASSWORD_SUCCESS_DESCRIPTION,
-    FORGOT_PASSWORD_SUCCESS_TITLE,
-    VERIFICATION_EXPIRED_LINK_DESCRIPTION,
-    VERIFICATION_EXPIRED_LINK_TITLE,
-    VERIFICATION_INVALID_LINK_DESCRIPTION,
-    VERIFICATION_INVALID_LINK_TITLE,
-    VERIFICATION_SUCCESS_DESCRIPTION,
-    VERIFICATION_SUCCESS_TITLE,
+    FORGOT_PASSWORD_FORM_CONTEXT,
+    FORGOT_PASSWORD_EXPIRED_LINK_CONTEXT,
+    FORGOT_PASSWORD_INVALID_LINK_CONTEXT,
+    FORGOT_PASSWORD_SUCCESS_CONTEXT,
+    VERIFICATION_EXPIRED_LINK_CONTEXT,
+    VERIFICATION_INVALID_LINK_CONTEXT,
+    VERIFICATION_SUCCESS_CONTEXT,
     OneTimeTokenType,
 )
 from .exceptions import OneTimeTokenExpiredException, OneTimeTokenInvalidException
@@ -146,29 +140,20 @@ class EmailVerificationPageView(APIView):
             return render(
                 request,
                 "email_verification_page.html",
-                {
-                    "title": VERIFICATION_EXPIRED_LINK_TITLE,
-                    "description": VERIFICATION_EXPIRED_LINK_DESCRIPTION,
-                },
+                VERIFICATION_EXPIRED_LINK_CONTEXT,
                 status=400,
             )
         except OneTimeTokenInvalidException:
             return render(
                 request,
                 "email_verification_page.html",
-                {
-                    "title": VERIFICATION_INVALID_LINK_TITLE,
-                    "description": VERIFICATION_INVALID_LINK_DESCRIPTION,
-                },
+                VERIFICATION_INVALID_LINK_CONTEXT,
                 status=400,
             )
         return render(
             request,
             "email_verification_page.html",
-            {
-                "title": VERIFICATION_SUCCESS_TITLE,
-                "description": VERIFICATION_SUCCESS_DESCRIPTION,
-            },
+            VERIFICATION_SUCCESS_CONTEXT,
             status=200,
         )
 
@@ -245,9 +230,7 @@ class ForgotPasswordPageView(APIView):
                 request,
                 "forgot_password_page.html",
                 {
-                    "title": FORGOT_PASSWORD_FORM_TITLE,
-                    "description": None,
-                    "type": "FORM",
+                    **FORGOT_PASSWORD_FORM_CONTEXT,
                     "token": reset_password_form_token,
                 },
                 status=200,
@@ -256,22 +239,14 @@ class ForgotPasswordPageView(APIView):
             return render(
                 request,
                 "forgot_password_page.html",
-                {
-                    "title": FORGOT_PASSWORD_EXPIRED_LINK_TITLE,
-                    "description": FORGOT_PASSWORD_EXPIRED_LINK_DESCRIPTION,
-                    "type": "ERROR",
-                },
+                FORGOT_PASSWORD_EXPIRED_LINK_CONTEXT,
                 status=400,
             )
         except OneTimeTokenInvalidException:
             return render(
                 request,
                 "forgot_password_page.html",
-                {
-                    "title": FORGOT_PASSWORD_INVALID_LINK_TITLE,
-                    "description": FORGOT_PASSWORD_INVALID_LINK_DESCRIPTION,
-                    "type": "ERROR",
-                },
+                FORGOT_PASSWORD_INVALID_LINK_CONTEXT,
                 status=400,
             )
         except Exception as e:
@@ -299,33 +274,21 @@ class ForgotPasswordPageView(APIView):
             return render(
                 request,
                 "forgot_password_page.html",
-                {
-                    "title": FORGOT_PASSWORD_SUCCESS_TITLE,
-                    "description": FORGOT_PASSWORD_SUCCESS_DESCRIPTION,
-                    "type": "SUCCESS",
-                },
+                FORGOT_PASSWORD_SUCCESS_CONTEXT,
                 status=200,
             )
         except OneTimeTokenExpiredException:
             return render(
                 request,
                 "forgot_password_page.html",
-                {
-                    "title": FORGOT_PASSWORD_EXPIRED_LINK_TITLE,
-                    "description": FORGOT_PASSWORD_EXPIRED_LINK_DESCRIPTION,
-                    "type": "ERROR",
-                },
+                FORGOT_PASSWORD_EXPIRED_LINK_CONTEXT,
                 status=400,
             )
         except OneTimeTokenInvalidException:
             return render(
                 request,
                 "forgot_password_page.html",
-                {
-                    "title": FORGOT_PASSWORD_INVALID_LINK_TITLE,
-                    "description": FORGOT_PASSWORD_INVALID_LINK_DESCRIPTION,
-                    "type": "ERROR",
-                },
+                FORGOT_PASSWORD_INVALID_LINK_CONTEXT,
                 status=400,
             )
         except Exception as e:
