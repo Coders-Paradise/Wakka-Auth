@@ -29,7 +29,7 @@ services:
     restart: always
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
+    image: phpmyadmin
     environment:
       - PMA_HOST=wakka_db
       - PMA_PORT=3306
@@ -43,4 +43,3 @@ volumes:
   wakka_db:
 
 
-    
