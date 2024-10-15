@@ -21,7 +21,7 @@ class OneTimeJWTToken:
     token_lifetime = settings.JWT_SETTINGS["ONE_TIME_TOKEN_LIFETIME"]
 
     @classmethod
-    def obtain(cls, payload: dict, lifetime: int) -> str:
+    def obtain(cls, payload: dict) -> str:
         """Generate a one time jwt token"""
         jti = uuid4().hex
         expires_at = timezone.now() + cls.token_lifetime
