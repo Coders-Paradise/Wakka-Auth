@@ -21,4 +21,6 @@ class WakkaResponse(Response):
         if status:
             actual_data = data
             data = {"data": actual_data, "status": status}
+            print("-" * 10, "DEBUG", "-" * 10)
+            print(data)
         super().__init__(data, status, template_name, headers, exception, content_type)

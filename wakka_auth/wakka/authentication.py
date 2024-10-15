@@ -49,6 +49,6 @@ class WakkaServerAuthentication(BaseAuthentication):
         app: Application = request.app
         server_api_key = request.META.get("HTTP_X_SERVER_API_KEY")
         server_api_key_hash = app.server_api_key_hash
-        if check_password(server_api_key, server_api_key_hash):
+        if ENV.SINGLE_APP or check_password(server_api_key, server_api_key_hash):
             return None
         raise InvalidServerApiKeyException
