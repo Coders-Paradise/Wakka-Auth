@@ -57,7 +57,7 @@ class TokenObtainPairView(APIView):
             **serializer.validated_data, app=request.app
         )
         serializer = serializers.TokenPairResponseSerializer(token_pair)
-        return WakkaResponse(serializer.data)
+        return WakkaResponse(serializer.data, status=status.HTTP_200_OK)
 
 
 @extend_schema(tags=["Client"])
@@ -73,7 +73,7 @@ class TokenRefreshView(APIView):
         serializer.is_valid(raise_exception=True)
         access_token = AuthService.get_access_token(**serializer.validated_data)
         serializer = serializers.TokenRefreshResponseSerializer(access_token)
-        return WakkaResponse(serializer.data)
+        return WakkaResponse(serializer.data, status=status.HTTP_200_OK)
 
 
 @extend_schema(tags=["Server"])
@@ -103,14 +103,8 @@ class UserDetailView(APIView):
     )
     def get(self, request: Request, user_id: str, *args, **kwargs):
         user = AuthService.get_user_by_id(user_id)
-        AuthService.send_verification_email(
-            user=user,
-            app=request.app,
-            domain=request.get_host(),
-            protocol=request.scheme,
-        )
         serializer = serializers.UserResponseSerializer(user)
-        return WakkaResponse(serializer.data)
+        return WakkaResponse(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
         request=serializers.UserUpdateRequestSerializer,

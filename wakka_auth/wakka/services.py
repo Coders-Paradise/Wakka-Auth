@@ -4,7 +4,7 @@ from django.contrib.auth.models import update_last_login
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
-from .constants import OneTimeTokenType
+from .constants import AuthTokenType, OneTimeTokenType
 from .exceptions import (
     EmailAlreadyVerifiedException,
     ForgotPasswordEmailSendingFailedException,
@@ -121,7 +121,10 @@ class AuthService:
                 )
             except Exception as e:
                 raise InvalidRefreshTokenException
-            user = User.objects.get(id=refresh_token.get("user_id"))
+            decoded_token = JWTToken.verify_token(
+                token=refresh_token, type=AuthTokenType.REFRESH_TOKEN
+            )
+            user = User.objects.get(id=decoded_token.get("user_id"))
             cls.check_user_verification_status(user=user, raise_exception=True)
             cls.check_user_active_status(user=user, raise_exception=True)
             # Updating the last login time
@@ -187,7 +190,7 @@ class AuthService:
         # Raise error if the user is already verified
         if user.verified:
             raise EmailAlreadyVerifiedException
-        
+
         mail_subject = "Activate your account"
         token = cls.generate_one_time_verification_token(
             user=user, type=OneTimeTokenType.EMAIL_VERIFICATION.value
