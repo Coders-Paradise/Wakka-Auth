@@ -28,42 +28,12 @@ class AuthTokenType(Enum):
     REFRESH_TOKEN = "REFRESH_TOKEN"
 
 
-VERIFICATION_EXPIRED_LINK_TITLE: str = "Expired Email Verification Link"
-VERIFICATION_EXPIRED_LINK_DESCRIPTION: str = (
-    "The verification link is expired. Please request a new verification link."
-)
-
-VERIFICATION_INVALID_LINK_TITLE: str = "Invalid Email Verification Link"
-VERIFICATION_INVALID_LINK_DESCRIPTION: str = (
-    "The verification link is invalid. Please request a new verification link."
-)
-
-VERIFICATION_SUCCESS_TITLE: str = "Email Verification Successful"
-VERIFICATION_SUCCESS_DESCRIPTION: str = (
-    "Your email has been successfully verified. Please close this tab and continue with the application."
-)
-
-FORGOT_PASSWORD_EXPIRED_LINK_TITLE: str = "Expired Password Reset Link"
-FORGOT_PASSWORD_EXPIRED_LINK_DESCRIPTION: str = (
-    "The password reset link is expired. Please request a new password reset link."
-)
-
-FORGOT_PASSWORD_INVALID_LINK_TITLE: str = "Invalid Password Reset Link"
-FORGOT_PASSWORD_INVALID_LINK_DESCRIPTION: str = (
-    "The password reset link is invalid. Please request a new password reset link."
-)
-
-FORGOT_PASSWORD_SUCCESS_TITLE: str = "Password Reset Successful"
-FORGOT_PASSWORD_SUCCESS_DESCRIPTION: str = (
-    "Your password has been successfully reset. Please close this tab and continue with the application."
-)
-
-#Dictionaries for Verfication, Forgot password.
+# Dictionaries for Verfication, Forgot password.
 FORGOT_PASSWORD_FORM_CONTEXT = {
     "title": "Reset Password",
     "description": None,
-    "type": "FORM", 
-} 
+    "type": "FORM",
+}
 
 VERIFICATION_EXPIRED_LINK_CONTEXT = {
     "title": "Expired Email Verification Link",
@@ -76,8 +46,8 @@ VERIFICATION_INVALID_LINK_CONTEXT = {
 }
 
 VERIFICATION_SUCCESS_CONTEXT = {
-    "title" : "Email Verification Successful",
-    "description" : "Your email has been successfully verified. Please close this tab and continue with the application.",
+    "title": "Email Verification Successful",
+    "description": "Your email has been successfully verified. Please close this tab and continue with the application.",
 }
 
 FORGOT_PASSWORD_EXPIRED_LINK_CONTEXT = {
