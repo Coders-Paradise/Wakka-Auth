@@ -47,13 +47,53 @@ FORGOT_PASSWORD_EXPIRED_LINK_TITLE: str = "Expired Password Reset Link"
 FORGOT_PASSWORD_EXPIRED_LINK_DESCRIPTION: str = (
     "The password reset link is expired. Please request a new password reset link."
 )
+
 FORGOT_PASSWORD_INVALID_LINK_TITLE: str = "Invalid Password Reset Link"
 FORGOT_PASSWORD_INVALID_LINK_DESCRIPTION: str = (
     "The password reset link is invalid. Please request a new password reset link."
 )
+
 FORGOT_PASSWORD_SUCCESS_TITLE: str = "Password Reset Successful"
 FORGOT_PASSWORD_SUCCESS_DESCRIPTION: str = (
     "Your password has been successfully reset. Please close this tab and continue with the application."
 )
 
-FORGOT_PASSWORD_FORM_TITLE: str = "Reset Password"
+#Dictionaries for Verfication, Forgot password.
+FORGOT_PASSWORD_FORM_CONTEXT = {
+    "title": "Reset Password",
+    "description": None,
+    "type": "FORM", 
+} 
+
+VERIFICATION_EXPIRED_LINK_CONTEXT = {
+    "title": "Expired Email Verification Link",
+    "description": "The verification link is expired. Please request a new verification link.",
+}
+
+VERIFICATION_INVALID_LINK_CONTEXT = {
+    "title": "Invalid Email Verification Link",
+    "description": "The verification link is invalid. Please request a new verification link.",
+}
+
+VERIFICATION_SUCCESS_CONTEXT = {
+    "title" : "Email Verification Successful",
+    "description" : "Your email has been successfully verified. Please close this tab and continue with the application.",
+}
+
+FORGOT_PASSWORD_EXPIRED_LINK_CONTEXT = {
+    "title": "Expired Password Reset Link",
+    "description": "The password reset link is expired. Please request a new password reset link.",
+    "type": "ERROR",
+}
+
+FORGOT_PASSWORD_INVALID_LINK_CONTEXT = {
+    "title": "Invalid Password Reset Link",
+    "description": "The password reset link is invalid. Please request a new password reset link.",
+    "type": "ERROR",
+}
+
+FORGOT_PASSWORD_SUCCESS_CONTEXT = {
+    "title": "Password Reset Successful",
+    "description": "Your password has been successfully reset. Please close this tab and continue with the application.",
+    "type": "SUCCESS",
+}
